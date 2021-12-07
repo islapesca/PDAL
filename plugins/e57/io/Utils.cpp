@@ -32,7 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <climits>
 #include <limits>
 
 #include "Utils.hpp"
@@ -76,6 +75,10 @@ Dimension::Id e57ToPdal(const std::string &e57Dimension)
         return Dimension::Id::Omit;
     else if (e57Dimension == "classification")
         return Dimension::Id::Classification;
+    else if (e57Dimension == "rowIndex")
+        return Dimension::Id::rowIndex;
+    else if (e57Dimension == "columnIndex")
+        return Dimension::Id::colIndex;
     return Dimension::Id::Unknown;
 }
 
@@ -107,6 +110,10 @@ std::string pdalToE57(Dimension::Id pdalDimension)
             return "classification";
         case pdal::Dimension::Id::Omit:
             return "cartesianInvalidState";
+        case pdal::Dimension::Id::rowIndex:
+            return "rowIndex";
+        case pdal::Dimension::Id::colIndex:
+            return "columnIndex";
         default:
             return std::string();
     }
@@ -117,7 +124,8 @@ std::vector<Dimension::Id> supportedPdalTypes()
     return {Dimension::Id::X, Dimension::Id::Y, Dimension::Id::Z,
             Dimension::Id::NormalX, Dimension::Id::NormalY, Dimension::Id::NormalZ,
             Dimension::Id::Red, Dimension::Id::Green, Dimension::Id::Blue,
-            Dimension::Id::Intensity, Dimension::Id::Omit, Dimension::Id::Classification
+            Dimension::Id::Intensity, Dimension::Id::Omit, Dimension::Id::Classification, 
+            Dimension::Id::rowIndex, Dimension::Id::colIndex
            };
 }
 
@@ -126,7 +134,7 @@ std::vector<std::string> supportedE57Types()
     return {"cartesianX",  "cartesianY", "cartesianZ",
             "nor:normalX", "nor:normalY", "nor:normalZ",
             "colorRed", "colorGreen", "colorBlue", "intensity",
-            "cartesianInvalidState", "classification"};
+            "cartesianInvalidState", "classification", "rowIndex", "columnIndex"};
 }
 
 std::vector<std::string> scalableE57Types()
@@ -229,8 +237,7 @@ std::pair<uint64_t, uint64_t> getPdalBounds(pdal::Dimension::Id id)
     auto typeName = pdal::Dimension::interpretationName(type);
     if (typeName.find("uint") == 0)
     {
-        uint64_t maxVal = ~0;
-	    maxVal = maxVal >> (sizeof(uint64_t) - pdal::Dimension::size(type)) * CHAR_BIT;
+        uint64_t maxVal = std::pow(2, 8 * pdal::Dimension::size(type)) - 1;
         return {0, maxVal};
     }
     throw pdal_error("Cannot retrieve bounds for : " + typeName);
@@ -325,4 +332,3 @@ void ExtraDims::parse(pdal::StringList dimList)
 }
 } // namespace e57plugin
 } // namespace pdal
-
