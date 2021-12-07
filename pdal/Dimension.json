@@ -551,5 +551,15 @@
     "name": "BeamDirectionZ",
     "type": "double",
     "description": "Beam direction unit vector Z coordinate"
+    },
+    {
+        "name": "rowIndex",
+        "type": "double",
+        "description": "index position of single point within point cloud"
+    },
+    {
+        "name": "colIndex",
+        "type": "double",
+        "description": "index position of single point within point cloud"
     }
 ] }
